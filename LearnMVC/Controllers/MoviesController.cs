@@ -35,7 +35,7 @@ namespace LearnMVC.Controllers
 
             var viewModel = new MovieFormViewModel
             {
-                Movie = new Movie(),
+                
                 Genres = genres
             };
 
@@ -51,7 +51,7 @@ namespace LearnMVC.Controllers
 
             var viewModel = new MovieFormViewModel
             {
-                Movie = movie,
+                
                 Genres = _context.Genres.ToList()
             };
 
@@ -96,9 +96,9 @@ namespace LearnMVC.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var viewModel = new MovieFormViewModel
+                var viewModel = new MovieFormViewModel(movie)
                 {
-                    Movie = movie,
+                    
                     Genres = _context.Genres.ToList()
                 };
                 return View("MovieForm", viewModel);
