@@ -1,12 +1,10 @@
-﻿using System;
+﻿using AutoMapper;
+using LearnMVC.Dtos;
+using LearnMVC.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Web.Http;
-using LearnMVC.Models;
-using Microsoft.Ajax.Utilities;
 
 namespace LearnMVC.Controllers.API
 {
@@ -20,25 +18,27 @@ namespace LearnMVC.Controllers.API
         }
 
         // GET /api/customers
-        public IEnumerable<Customer> GetCustomers()
+        public IEnumerable<CustomerDto> GetCustomers()
         {
-            return _context.Customers.ToList();
+            return _context.Customers.ToList().Select(Mapper.Map<Customer, CustomerDto>);
         }
+
         // GET /api/customers/1
-        public Customer GetCustomer(int id)
+        public CustomerDto GetCustomer(int id)
         {
             var customer = _context.Customers.SingleOrDefault(c => c.Id == id);
 
-            if (customer==null)
+            if (customer == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
 
-            return customer;
+            return Mapper.Map<Customer, CustomerDto>(customer);
         }
+
         //POST /api/customers
         [HttpPost]
-        public Customer CreateCustomer(Customer customer)
+        public CustomerDto CreateCustomer(CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
             {
@@ -46,47 +46,39 @@ namespace LearnMVC.Controllers.API
             }
             else
             {
+                var customer = Mapper.Map<CustomerDto, Customer>(customerDto);
+
                 _context.Customers.Add(customer);
                 _context.SaveChanges();
+
+                customerDto.Id = customer.Id;
             }
 
-            return customer;
+            return customerDto;
         }
+
         //PUT /api/customers/1 this is an update script
         [HttpPut]
-        public void UpdateCustomer(int id, Customer customer)
+        public void UpdateCustomer(int id, CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
-            {
                 throw new HttpResponseException(HttpStatusCode.BadRequest);
-            }
-            else
-            {
-                var customerInDb = _context.Customers.SingleOrDefault(c => c.Id == id);
-                if (customerInDb == null)
-                {
-                    throw new    HttpResponseException(HttpStatusCode.NotFound);
-                }
-                else
-                {
-                    customerInDb.Name = customer.Name;
-                    customerInDb.Birthdate = customer.Birthdate;
-                    customerInDb.IsSubscribedToNewsletter = customer.IsSubscribedToNewsletter;
-                    customerInDb.MembershipTypeId = customer.MembershipTypeId;
-                    _context.Customers.Add(customer);
-                    _context.SaveChanges();
-                    
-                }
-            }
-            
+
+            var customerInDb = _context.Customers.SingleOrDefault(c => c.Id == id);
+            if (customerInDb == null)
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            Mapper.Map<CustomerDto, Customer>(customerDto, customerInDb);
+
+            _context.SaveChanges();
         }
+
         // /api/customers/1
         [HttpDelete]
         public void DeleteCustomer(int id)
         {
             var customerInDb = _context.Customers.SingleOrDefault(c => c.Id == id);
 
-            if (customerInDb ==null)
+            if (customerInDb == null)
             {
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
