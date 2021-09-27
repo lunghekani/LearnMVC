@@ -11,7 +11,7 @@ namespace LearnMVC.Controllers.API
 {
     public class CustomersController : ApiController
     {
-        private ApplicationDbContext _context;
+      private ApplicationDbContext _context;
 
         public CustomersController()
         {
@@ -19,9 +19,11 @@ namespace LearnMVC.Controllers.API
         }
 
         // GET /api/customers
-        public IEnumerable<CustomerDto> GetCustomers()
+        public IHttpActionResult GetCustomers()
         {
-            return _context.Customers.ToList().Select(Mapper.Map<Customer, CustomerDto>);
+            var customerDtos = _context.Customers.ToList().Select(Mapper.Map<Customer, CustomerDto>);
+            
+            return Ok(customerDtos);    
         }
 
         // GET /api/customers/1
@@ -35,22 +37,22 @@ namespace LearnMVC.Controllers.API
             return Ok(Mapper.Map<Customer, CustomerDto>(customer));
         }
 
-        //POST /api/customers
+        // POST /api/customers
         [HttpPost]
         public IHttpActionResult CreateCustomer(CustomerDto customerDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
-            
+
             var customer = Mapper.Map<CustomerDto, Customer>(customerDto);
             _context.Customers.Add(customer);
             _context.SaveChanges();
 
             customerDto.Id = customer.Id;
-            return Created(new Uri(Request.RequestUri +"/"+customer.Id), customerDto);
+            return Created(new Uri(Request.RequestUri + "/" + customer.Id), customerDto);
         }
 
-        //PUT /api/customers/1 this is an update script
+        // PUT /api/customers/1
         [HttpPut]
         public IHttpActionResult UpdateCustomer(int id, CustomerDto customerDto)
         {
@@ -69,7 +71,7 @@ namespace LearnMVC.Controllers.API
             return Ok();
         }
 
-        // /api/customers/1
+        // DELETE /api/customers/1
         [HttpDelete]
         public IHttpActionResult DeleteCustomer(int id)
         {
